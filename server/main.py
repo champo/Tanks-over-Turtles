@@ -1,6 +1,8 @@
 from sys import argv
 
-from game import play
+from game import play, action_with_response
+from map import Map
+from tank import Tank
 
 def main():
     assert len(argv) == 5
@@ -8,8 +10,9 @@ def main():
     tanks_per_team = int(argv[2])
     team_file_name = argv[3]
     shoot_range = int(argv[4])
+    # team_commands = None
     with open(team_file_name) as f:
-        teams_commands = f.readlines()
+        team_commands = f.readlines()
 
     map = Map(map_size, shoot_range)
     for team,command in enumerate(team_commands):

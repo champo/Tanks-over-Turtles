@@ -1,11 +1,6 @@
 from map import Map
 
-commands = {
-        "move": (Map.move, 0),
-        "shoot": (Map.shoot, 1),
-        "laser": (action_with_response(Map.laser), 2)
-}
-
+commands = {}
 
 def play(map):
     """ Game busy-loop """
@@ -20,6 +15,8 @@ def play(map):
             commands[action][0](map, tank, dir)
 
         map.round_ended()
+
+    map(lambda tank: tank.kill(), map.get_alive_tanks())
 
 def action_with_response(action):
     def wrapped(map, tank, *args):
@@ -37,3 +34,10 @@ def is_over(tanks):
             return False
 
     return True
+
+commands = {
+        "move": (Map.move, 0),
+        "shoot": (Map.shoot, 1),
+        "laser": (action_with_response(Map.laser), 2)
+}
+

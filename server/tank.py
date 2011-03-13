@@ -4,7 +4,7 @@ class Tank(object):
 
     def __init__(self, team, command, range):
         self.__team = team
-        self.__process = Popen(command.split(' '), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        self.__process = Popen(command.split('\n')[0].split(' '), stdin=PIPE, stdout=PIPE, stderr=PIPE)
         self.__alive = True
 
         self.send_response([team, range])
@@ -33,7 +33,7 @@ class Tank(object):
         if not self.__alive:
             return
 
-        if isinstance(response, 'str'):
+        if isinstance(response, basestring):
             response = [response]
 
         self.__process.stdout.write(' '.join([str(value) for value in response]) + '\n')
