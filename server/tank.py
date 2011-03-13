@@ -9,13 +9,15 @@ class Tank(object):
         self.__team = team
 
         sock = socket()
+        Tank.socket_port += 1
         sock.bind(('localhost', Tank.socket_port))
         sock.listen(1)
 
-        self.__process = Popen(command.split('\n')[0].split(' ') + [str(Tank.socket_port)])
+        self.__process = Popen(command.strip().split(' ') + [str(Tank.socket_port)])
         self.__alive = True
 
         self.__socket = sock.accept()[0]
+        sock.close()
         self.send_response([team, range])
 
     def get_team(self):
@@ -34,11 +36,7 @@ class Tank(object):
         """ Get a tuple with (action, direction) with the tanks next action """
         if not self.__alive:
             return None
-        values = None
-        while not values:
-            values = self.__socket.recv(1024)
-
-        values = valus.split(' ')[:2]
+        values = self.__socket.recv(1024).strip().split(' ')[:2]
         return (values[0], values[1])
 
     def send_response(self, response):

@@ -36,7 +36,7 @@ class Map(object):
         pos = self._tank_to_pos(tank)
         self._rows[pos[0]].pop(pos[1])
         self._cols[pos[1]].pop(pos[0])
-    
+
     def _put_tank_in(self, tank, pos):
         ''' Puts a tank in a given position. If that position is already
         taken, will kill both tanks '''
@@ -75,7 +75,7 @@ class Map(object):
             index = 0 if dir2 > 0 else len(line)-1
             seek_pointer = line[0]
             dist = me - seek_pointer or self._dimension
-            
+
         if dir in ['UP', 'DOWN']:
             return (seek_pointer, pos[1], dist)
         elif dir in ['LEFT', 'RIGHT']:
@@ -90,8 +90,10 @@ class Map(object):
 
     def laser(self, tank, dir):
         ''' Checks for what is to the 'dir' of a given tank, and returns a\
-        tuple with two integers: the first element is what it found, and the 
+        tuple with two integers: the first element is what it found, and the
         second element is how far away it is '''
+
+        print dir
         assert(dir in _ALTER_COL.keys())
         assert(tank.__class__.__name__ == 'Tank')
         pos = self._tank_to_pos[tank]
@@ -120,7 +122,7 @@ class Map(object):
         return self._tank_to_pos.keys()
 
     def round_ended(self):
-        ''' This method should be called when the round is over, to 
+        ''' This method should be called when the round is over, to
         clean up all tanks that were killed in this round '''
         for tank in self._to_be_killed:
             self._take_tank_out(tank)
