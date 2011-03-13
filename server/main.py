@@ -15,6 +15,8 @@ def main():
     teams = []
     for team,command in enumerate(team_commands):
         tanks = [Tank(team + 1, command, shoot_range) for i in range(0, tanks_per_team)]
+        for tank in tanks:
+            map.add_tank(tank)
 
     play(map, teams)
 
