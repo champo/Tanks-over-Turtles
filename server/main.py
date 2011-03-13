@@ -12,13 +12,11 @@ def main():
         teams_commands = f.readlines()
 
     map = Map(map_size, shoot_range)
-    teams = []
     for team,command in enumerate(team_commands):
-        tanks = [Tank(team + 1, command, shoot_range) for i in range(0, tanks_per_team)]
-        for tank in tanks:
-            map.add_tank(tank)
+        for i in range(0, tanks_per_team):
+            map.add_tank(Tank(team + 1, command, shoot_range))
 
-    play(map, teams)
+    play(map)
 
 if __name__ == "__main__":
     main()

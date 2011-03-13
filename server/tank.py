@@ -5,6 +5,7 @@ class Tank(object):
     def __init__(self, team, command, range):
         self.__team = team
         self.__process = Popen(command.split(' '), stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        self.__alive = True
 
         self.send_response([team, range])
 
@@ -14,6 +15,10 @@ class Tank(object):
     def kill(self):
         """ OH NOES """
         self.__process.kill()
+        self.__alive = False
+
+    def is_alive(self):
+        return self.__alive
 
     def next_action(self):
         """ Get a tuple with (action, direction) with the tanks next action """
