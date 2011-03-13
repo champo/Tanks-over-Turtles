@@ -28,8 +28,6 @@ def is_over(tanks):
     if len(tanks) == 0:
         return True
 
-    print [tank.get_team() for tank in tanks]
-
     team = tanks[0].get_team()
     for tank in tanks[1:]:
         if tank.get_team() != team:
