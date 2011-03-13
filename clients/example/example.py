@@ -8,7 +8,7 @@ def get_random_direction():
 if __name__ == '__main__':
     socket = socket()
     socket.connect(('localhost', int(argv[1])))
-    
+
     data = socket.recv(1024)
     TEAM_ID, SHOOT_RANGE = map(int, data.split(' ')[:2])
 
