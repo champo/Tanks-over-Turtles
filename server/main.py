@@ -26,7 +26,12 @@ def main():
         for i in range(0, tanks_per_team):
             map.add_tank(Tank(team + 1, command, shoot_range), positions.pop())
 
+    # try:
     play(map)
+    # except Exception as e:
+    #     for tank in map.get_alive_tanks():
+    #         tank.kill()
+    #     raise e
 
 if __name__ == "__main__":
     main()

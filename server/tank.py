@@ -19,6 +19,7 @@ class Tank(object):
         self.__socket = sock.accept()[0]
         sock.close()
         self.send_response([team, range])
+        self._buffer = ''
 
     def get_team(self):
         return self.__team
@@ -36,7 +37,11 @@ class Tank(object):
         """ Get a tuple with (action, direction) with the tanks next action """
         if not self.__alive:
             return None
-        values = self.__socket.recv(1024).strip().split(' ')[:2]
+        self._buffer += self.__socket.recv(1024)
+        index = self._buffer.find('\n')
+        values = self._buffer[:index]
+        self._buffer = self._buffer[index+1:]
+        values = values.strip().split(' ')
         return (values[0], values[1])
 
     def send_response(self, response):
