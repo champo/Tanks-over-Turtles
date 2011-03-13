@@ -7,7 +7,7 @@ class Tank(object):
         self.__team = team
 
         self.__socket = socket()
-        self.__socket.bind(('localhost', '5999'))
+        self.__socket.bind(('localhost', 5999))
         self.__socket.listen(1)
 
         self.__process = Popen(command.split('\n')[0].split(' '))
