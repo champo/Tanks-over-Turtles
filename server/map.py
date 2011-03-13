@@ -66,14 +66,17 @@ class Map(object):
         elif dir == 'LEFT' or dir == 'RIGHT':
             line = self._rows[pos[0]]
             me = pos[1]
+        index = line.index(me)
         dir2 = 1 if dir in ['RIGHT', 'DOWN'] else -1
-        dist = 1
-        seek_pointer = me + dir2
-        while dist < self._dimension and not line.has_key(seek_pointer):
-            seek_pointer += dir2
-            seek_pointer %= self._dimension
-            dist += 1
 
+        if 0 <= index + dir2 < len(line):
+            seek_pointer = line[index+dir2]
+            dist = abs(seek_pointer - me)
+        else:
+            index = 0 if dir2 > 0 else len(line)-1
+            seek_pointer = line[0]
+            dist = me - seek_pointer or self._dimension
+            
         if dir in ['UP', 'DOWN']:
             return (seek_pointer, pos[1], dist)
         elif dir in ['LEFT', 'RIGHT']:
