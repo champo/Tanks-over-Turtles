@@ -1,36 +1,32 @@
 #include <string>
 #include <iostream>
-#include <vector>
 #include <cstdlib>
 
 using namespace std;
 
 string getRandomDirection(){
-    string direction;
-    switch (rand()%4){
-        case 0: direction = "UP"; break;
-        case 1: direction = "DOWN"; break;
-        case 2: direction = "LEFT"; break;
-        case 3: direction = "RIGHT"; break;
-    }
-    return direction;
+
+	string directions[] = {"UP", "RIGHT", "DOWN", "LEFT"};
+	
+	return directions[rand() % 4];
 }
 
 int main(){
-    int TEAM, RANGE;
 
-    cin >> TEAM >> RANGE;
-    srand(0);
+    int TEAM_ID, SHOOT_RANGE;
 
-    while (true){
+    cin >> TEAM_ID >> SHOOT_RANGE;
+
+    while (true) {
         string direction = getRandomDirection();
 
         cout << "LASER " << direction << endl;
-        int what, distance;
-        cin >> what >> distance;
 
-        if (what && what != TEAM){
-            if (distance < RANGE){
+        int TANK_ID, TANK_DIS;
+        cin >> TANK_ID >> TANK_DIS;
+
+        if ( TANK_ID && TANK_ID != TEAM_ID ) {
+            if ( TANK_DIS < SHOOT_RANGE ) {
                 cout << "SHOOT " << direction << endl;
             }
         }
@@ -40,4 +36,3 @@ int main(){
 
     return 0;
 }
-
