@@ -14,7 +14,7 @@ class Map(object):
 
     def _valid_position(self, pos):
         ''' Returns True if 'pos' is a valid position in the map, and is
-        in the correct form (a tuple or a list of only two elements)'''
+        in the correct form (a tuple or a list of only two elements) '''
         return ((type(pos) == type(()) or type(pos) == type([]))
             and (len(pos) == 2)
             and (0 <= pos[0] < self._dimension)
@@ -32,17 +32,14 @@ class Map(object):
         return self._rows[pos[0]].has_key(pos[1])
 
     def _take_tank_out(self, tank):
-        ''' Updates the inner data of this instance taking the tank out of
-        its current position
-        '''
+        ''' Takes a tank out of a position '''
         pos = self._tank_to_pos(tank)
         self._rows[pos[0]].pop(pos[1])
         self._cols[pos[1]].pop(pos[0])
     
     def _put_tank_in(self, tank, pos):
         ''' Puts a tank in a given position. If that position is already
-        taken, will kill both tanks
-        '''
+        taken, will kill both tanks '''
         if (self._position_taken(pos)):
             tank.kill()
             self._get_tank_at(pos).kill()
@@ -74,6 +71,7 @@ class Map(object):
         seek_pointer = me + dir2
         while dist < self._dimension and not line.has_key(seek_pointer):
             seek_pointer += dir2
+            seek_pointer %= self._dimension
             dist += 1
 
         if dir in ['UP', 'DOWN']:
