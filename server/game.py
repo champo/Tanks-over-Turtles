@@ -3,7 +3,7 @@ from map import Map
 commands = {
         "move": (Map.move, 0),
         "shoot": (Map.shoot, 1),
-        "laser": (Map.laser, 2)
+        "laser": (action_with_response(Map.laser), 2)
 }
 
 
@@ -17,8 +17,14 @@ def play(map):
         commands.sort(lambda a,b: commands[a[1]] - commands[b[1]])
 
         for tank, action, dir in commands:
-            if tank.is_alive():
-                commands[action][0](map, tank, dir)
+            commands[action][0](map, tank, dir)
+
+        map.round_ended()
+
+def action_with_response(action):
+    def wrapped(map, tank, *args):
+        tank.send_message(action(map, tank, *args))
+    return wrapped
 
 def is_over(tanks):
     """ Check whether the game is over """
