@@ -1,1 +1,24 @@
-Tebez, stop creeping.
+Tanks over Turtles is a game in wich you have a given number of tanks over a circular world held by gigant turtles.
+Each of your tanks runs the same strategy without knoledge of the other tanks.
+The tanks can move, ask for information of the map or shoot a missile. When a tank is reached by a missile, it instantly disappears from the map. The last remaining team on the map is the winner.
+
+The initiall call to your strategy programm is:
+
+$ your_programm TEAM_ID SHOOT_RANGE
+
+  * TEAM_ID is a positive integer representing your team
+  * SHOOT_RANGE is the maximum distance the missiles reach
+
+And during the gameplay, the operations (in order of appliance) available are:
+
+MOVE [UP|RIGHT|DOWN|LEFT]
+
+  moves the tank one unit
+
+SHOOT [UP|RIGHT|DOWN|LEFT]
+
+  shoots a missile
+
+LASER [UP|RIGHT|DOWN|LEFT]
+
+  it returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
