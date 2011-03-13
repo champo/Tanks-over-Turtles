@@ -22,14 +22,19 @@ class Tank(object):
 
     def next_action(self):
         """ Get a tuple with (action, direction) with the tanks next action """
+        if not self.__value:
+            return None
         values = self.__process.stdin.readline().split(' ')[:2]
         return (values[0], values[1])
 
     def send_response(self, response):
         """ Write the response to the tank """
 
+        if not self.__alive:
+            return
+
         if isinstance(response, 'str'):
             response = [response]
 
-        self.__process.stdout.write(' '.join(response) + '\n')
+        self.__process.stdout.write(' '.join([str(value) for value in response]) + '\n')
         self.__process.stdout.flush()
