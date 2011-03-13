@@ -1,5 +1,9 @@
 from sys import argv
 from socket import socket
+from random import randrange
+
+def get_random_direction():
+    return ['UP', 'DOWN', 'LEFT', 'RIGHT'][randrange(4)]
 
 if __name__ == '__main__':
     socket = socket()

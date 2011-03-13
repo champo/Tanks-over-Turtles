@@ -59,11 +59,10 @@ class Map(object):
         ''' Returns three elements in a list, with information on where is
         the next "interesting" thing in the map in the form
         (row, col, distance) '''
-        line = []
-        if dir == 'UP' or dir == 'DOWN':
+        if dir in ['UP', 'DOWN']:
             line = self._cols[pos[1]]
             me = pos[0]
-        elif dir == 'LEFT' or dir == 'RIGHT':
+        elif dir in ['LEFT', 'RIGHT']:
             line = self._rows[pos[0]]
             me = pos[1]
         index = line.index(me)
