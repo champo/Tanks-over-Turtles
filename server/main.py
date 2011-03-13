@@ -1,4 +1,6 @@
 from sys import argv
+from random import randrange
+
 
 from game import play, action_with_response
 from map import Map
@@ -15,9 +17,14 @@ def main():
         team_commands = f.readlines()
 
     map = Map(map_size, shoot_range)
+    positions = []
+    while len(positions) != tanks_per_team * len(team_commands):
+        new_pos = (randrange(map_size), randrange(map_size))
+        if new_pos not in positions:
+            positions.append(new_pos)
     for team,command in enumerate(team_commands):
         for i in range(0, tanks_per_team):
-            map.add_tank(Tank(team + 1, command, shoot_range))
+            map.add_tank(Tank(team + 1, command, shoot_range), positions.pop())
 
     play(map)
 
