@@ -8,6 +8,8 @@ def assert_params_decorator(function):
         assert(isinstance(args[1], Tank))
         assert(args[2] in _ALTER_COL.keys())
         return function(*args, **kwds)
+    # Preserve name for logging
+    new_function.__name__ = function.__name__
     return new_function
 
 def logging_decorator(function):
