@@ -1,6 +1,6 @@
 from sys import argv
 from random import randrange
-
+import socket
 
 from game import play, action_with_response
 from map import Map
@@ -24,14 +24,26 @@ def main():
             positions.append(new_pos)
     for team,command in enumerate(team_commands):
         for i in range(0, tanks_per_team):
-            map.add_tank(Tank(team + 1, command, shoot_range), positions.pop())
+            success = False
+            socket_port = 5999
+            while not success:
+                try:
+                    map.add_tank(Tank(
+                            team + 1, command, shoot_range, socket_port
+                        ), positions.pop()
+                    )
+                except socket.error as e:
+                    socket_port += 1
+                else:
+                    success = True
 
-    # try:
-    play(map)
-    # except Exception as e:
-    #     for tank in map.get_alive_tanks():
-    #         tank.kill()
-    #     raise e
+    try:
+        play(map)
+    except Exception as e:
+        for tank in map.get_alive_tanks():
+            tank.kill()
+        print("An error has occurred.")
+        raise e
 
 if __name__ == "__main__":
     main()

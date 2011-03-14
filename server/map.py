@@ -129,8 +129,9 @@ class Map(object):
         ''' Move a tank in a given direction '''
         assert(tank in self._tank_to_pos.keys())
         oldpos = self._tank_to_pos[tank]
-        self._put_tank_in(tank, self._move_pos_dir
-            (self._tank_to_pos[tank], dir))
+        self._put_tank_in(tank, self._move_pos_dir(
+            self._tank_to_pos[tank], dir)
+        )
         self._take_tank_out(tank, oldpos)
 
     @logging_decorator
@@ -140,12 +141,11 @@ class Map(object):
         what = self._get_next_thing(self._tank_to_pos[tank], dir)
         if what[2] <= self._shoot_range:
             other_tank = self._get_tank_at(what[:2])
-            other_tank.kill()
             self._to_be_killed.append(other_tank)
 
     def get_alive_tanks(self):
         ''' Returns a list of alive tanks '''
-        return self._tank_to_pos.keys()
+        return [tank for tank in self._tank_to_pos.keys() if tank]
 
     @logging_decorator
     def round_ended(self):
@@ -154,5 +154,6 @@ class Map(object):
         for tank in self._to_be_killed:
             self._take_tank_out(tank, self._tank_to_pos[tank])
             self._tank_to_pos.pop(tank)
+            tank.kill()
         self._to_be_killed = []
 

@@ -11,11 +11,18 @@ def play(map):
             commands.append((tank, action, dir))
         commands.sort(lambda a,b: command_data[a[1]][1] - command_data[b[1]][1])
 
+        shots_round_ended_called = False
         for tank, action, dir in commands:
-            command_data[action][0](map, tank, dir)
+            if action == 'LASER' and not shots_round_ended_called:
+                map.round_ended()
+                shots_round_ended_called = True
+            if tank.is_alive():
+                command_data[action][0](map, tank, dir)
 
-        map.round_ended()
-
+    if map.get_alive_tanks():
+        print("Winning team: " + str(map.get_alive_tanks()[0].get_team()))
+    else:
+        print("Draw.")
     [tank.kill() for tank in map.get_alive_tanks()]
 
 def action_with_response(action):

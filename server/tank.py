@@ -3,17 +3,14 @@ from socket import socket
 
 class Tank(object):
 
-    socket_port = 5999
-
-    def __init__(self, team, command, range):
+    def __init__(self, team, command, range, socket_port):
         self.__team = team
 
         sock = socket()
-        Tank.socket_port += 1
-        sock.bind(('localhost', Tank.socket_port))
+        sock.bind(('localhost', socket_port))
         sock.listen(1)
 
-        self.__process = Popen(command.strip().split(' ') + [str(Tank.socket_port)])
+        self.__process = Popen(command.strip().split(' ') + [str(socket_port)])
         self.__alive = True
 
         self.__socket = sock.accept()[0]
