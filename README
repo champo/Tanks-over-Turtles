@@ -22,6 +22,6 @@ SHOOT [UP|RIGHT|DOWN|LEFT]
 
 LASER [UP|RIGHT|DOWN|LEFT]
 
-  it returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
+  returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
 
 Every line should have an end of line
