@@ -52,3 +52,4 @@ class Tank(object):
 
         self.__file.write(' '.join([str(value) for value in response]) + '\n')
         self.__file.flush()
+

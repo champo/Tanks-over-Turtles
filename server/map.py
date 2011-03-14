@@ -29,6 +29,7 @@ class Map(object):
         self._rows = [{} for i in xrange(dimension)]
         self._cols = [{} for i in xrange(dimension)]
 
+    @logging_decorator
     def _valid_position(self, pos):
         ''' Returns True if 'pos' is a valid position in the map, and is
         in the correct form (a tuple or a list of only two elements) '''
@@ -37,6 +38,7 @@ class Map(object):
             and (0 <= pos[0] < self._dimension)
             and (0 <= pos[1] < self._dimension))
 
+    @logging_decorator
     def _move_pos_dir(self, pos, dir):
         ''' Return a new position, to the 'dir' of 'pos' '''
         return (
@@ -49,9 +51,8 @@ class Map(object):
         return self._rows[pos[0]].has_key(pos[1]) and self._cols[pos[1]].has_key(pos[0])
 
     @logging_decorator
-    def _take_tank_out(self, tank):
+    def _take_tank_out(self, tank, pos):
         ''' Takes a tank out of a position '''
-        pos = self._tank_to_pos[tank]
         self._rows[pos[0]].pop(pos[1])
         self._cols[pos[1]].pop(pos[0])
 
@@ -62,8 +63,7 @@ class Map(object):
         if (self._position_taken(pos)):
             tank.kill()
             self._get_tank_at(pos).kill()
-            self._take_tank_out(tank)
-            self._take_tank_out(self._get_tank_at(pos))
+            self._take_tank_out(self._get_tank_at(pos), pos)
 
         else:
             self._tank_to_pos[tank] = pos
@@ -126,9 +126,10 @@ class Map(object):
     def move(self, tank, dir):
         ''' Move a tank in a given direction '''
         assert(tank in self._tank_to_pos.keys())
+        oldpos = self._tank_to_pos[tank]
         self._put_tank_in(tank, self._move_pos_dir
             (self._tank_to_pos[tank], dir))
-        self._take_tank_out(tank)
+        self._take_tank_out(tank, oldpos)
 
     @logging_decorator
     @assert_params_decorator
@@ -142,10 +143,11 @@ class Map(object):
         ''' Returns a list of alive tanks '''
         return self._tank_to_pos.keys()
 
+    @logging_decorator
     def round_ended(self):
         ''' This method should be called when the round is over, to
         clean up all tanks that were killed in this round '''
         for tank in self._to_be_killed:
-            self._take_tank_out(tank)
+            self._take_tank_out(tank, self._tank_to_pos[tank])
         self._to_be_killed = []
 
