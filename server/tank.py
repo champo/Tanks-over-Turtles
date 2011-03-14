@@ -18,8 +18,8 @@ class Tank(object):
 
         self.__socket = sock.accept()[0]
         sock.close()
+        self.__file = self.__socket.makefile()
         self.send_response([team, range])
-        self._buffer = ''
 
     def get_team(self):
         return self.__team
@@ -27,6 +27,7 @@ class Tank(object):
     def kill(self):
         """ OH NOES """
         self.__process.kill()
+        self.__file.close()
         self.__socket.close()
         self.__alive = False
 
@@ -37,11 +38,7 @@ class Tank(object):
         """ Get a tuple with (action, direction) with the tanks next action """
         if not self.__alive:
             return None
-        self._buffer += self.__socket.recv(1024)
-        index = self._buffer.find('\n')
-        values = self._buffer[:index]
-        self._buffer = self._buffer[index+1:]
-        values = values.strip().split(' ')
+        values = self.__file.readline().strip().split(' ')
         return (values[0], values[1])
 
     def send_response(self, response):
@@ -53,4 +50,5 @@ class Tank(object):
         if isinstance(response, basestring):
             response = [response]
 
-        self.__socket.send(' '.join([str(value) for value in response]) + '\n')
+        self.__file.write(' '.join([str(value) for value in response]) + '\n')
+        self.__file.flush()
