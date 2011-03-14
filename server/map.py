@@ -63,6 +63,8 @@ class Map(object):
         if (self._position_taken(pos)):
             tank.kill()
             self._get_tank_at(pos).kill()
+            self._tank_to_pos.pop(tank)
+            self._tank_to_pos.pop(self._get_tank_at(pos))
             self._take_tank_out(self._get_tank_at(pos), pos)
 
         else:
@@ -137,7 +139,9 @@ class Map(object):
         ''' Makes a tank to shoot in a given direction '''
         what = self._get_next_thing(self._tank_to_pos[tank], dir)
         if what[2] <= self._shoot_range:
-            self._get_tank_at(what[:2]).kill()
+            other_tank = self._get_tank_at(what[:2])
+            other_tank.kill()
+            self._to_be_killed.append(other_tank)
 
     def get_alive_tanks(self):
         ''' Returns a list of alive tanks '''
@@ -149,5 +153,6 @@ class Map(object):
         clean up all tanks that were killed in this round '''
         for tank in self._to_be_killed:
             self._take_tank_out(tank, self._tank_to_pos[tank])
+            self._tank_to_pos.pop(tank)
         self._to_be_killed = []
 
