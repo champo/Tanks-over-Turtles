@@ -26,10 +26,10 @@ int main( void ) {
 		scanf( "%d %d\n", &tank_id, &tank_dis );
 
 		if ( tank_id != team_id ) {
-            if ( tank_dis < shoot_range ) {
-                printf( "SHOOT %s\n", direction );
-            }
-        }
+			if ( tank_dis < shoot_range ) {
+				printf( "SHOOT %s\n", direction );
+			}
+		}
 
 		printf( "MOVE %s\n", get_random_direction() );
 	}
