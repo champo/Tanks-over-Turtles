@@ -8,7 +8,7 @@ The initial information you will get, is the following line:
 
 TEAM_ID SHOOT_RANGE
 
-  where TEAM_ID is a positive integer representing your team, and SHOOT_RANGE is the maximum distance the missiles reach
+  where TEAM_ID is a positive integer representing your team, and SHOOT_RANGE is the maximum distance the missiles can travel
 
 After this, and for the rest of the game, the operations (in order of appliance) available are:
 
@@ -22,6 +22,12 @@ SHOOT [UP|RIGHT|DOWN|LEFT]
 
 LASER [UP|RIGHT|DOWN|LEFT]
 
-  returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
+  returns two integers separated by a space, the TEAM_ID of the closest tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
 
-Every line should have an end of line
+Every command should end with an end of line
+
+Further clarifications:
+
+ * After every tank has told its command, there's a moving phase, then a shooting phase, and finally a laser phase.
+
+ * If a tank moves to an occupied position, both tanks are destroyed at the end of the moving phase ( so tank castling is valid)
