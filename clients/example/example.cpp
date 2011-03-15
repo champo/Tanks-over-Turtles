@@ -1,37 +1,41 @@
-#include <string>
 #include <iostream>
+#include <string>
 #include <cstdlib>
-
+#include <ctime>
 using namespace std;
 
-string getRandomDirection(){
+string get_random_direction(){
 
-	string directions[] = {"UP", "RIGHT", "DOWN", "LEFT"};
+	static const string directions[] = {"UP", "RIGHT", "DOWN", "LEFT"};
 	
-	return directions[rand() % 4];
+	return directions[ rand() % 4 ];
 }
 
 int main(){
 
-    int TEAM_ID, SHOOT_RANGE;
+	srand( time( NULL ) );
 
-    cin >> TEAM_ID >> SHOOT_RANGE;
+    int team_id, shoot_range;
+
+    cin >> team_id >> shoot_range;
 
     while (true) {
-        string direction = getRandomDirection();
+
+        string direction = get_random_direction();
 
         cout << "LASER " << direction << endl;
 
-        int TANK_ID, TANK_DIS;
-        cin >> TANK_ID >> TANK_DIS;
+        int tank_id, tank_dis;
 
-        if ( TANK_ID && TANK_ID != TEAM_ID ) {
-            if ( TANK_DIS < SHOOT_RANGE ) {
+        cin >> tank_id >> tank_dis;
+
+        if ( tank_id != team_id ) {
+            if ( tank_dis < shoot_range ) {
                 cout << "SHOOT " << direction << endl;
             }
         }
 
-        cout << "MOVE " << getRandomDirection() << endl;
+        cout << "MOVE " << get_random_direction() << endl;
     }
 
     return 0;
