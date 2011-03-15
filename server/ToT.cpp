@@ -1,49 +1,74 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <list>
 #include <algorithm>
+
 #include <ctime>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+
 using namespace std;
 
 
 // verbosity \in {0..5}
-#define VERBOSITY 0
+#define VERBOSITY 1
 
 // maximum command length
 #define MAX_COM_LEN 20
 
 
-#define INFORM( ver, ... ) do{ if( VERBOSITY >= ver ) printf( __VA_ARGS__ ); }while(0)
-#define PRINT_ERROR( ex, ... ) do{ INFORM( 0, __VA_ARGS__ ); INFORM( 0, ex ? "\nExiting...\n" : "\n" ); if( ex ) exit(1); }while(0)
+
+inline void inform( int verbosity, const char* fmt, ... ) {
+
+	if( VERBOSITY >= verbosity ) {
+		va_list args;
+		va_start( args, fmt );
+		vprintf( fmt, args );
+	}
+}
+
+
+inline void print_error( bool with_exit, const char* fmt, ... ) {
+
+	if( VERBOSITY >= 0 ) {
+		va_list args;
+		va_start( args, fmt );
+		vprintf( fmt, args );
+		printf( with_exit ? "\nExiting...\n" : "\n" );
+	}
+
+	if( with_exit ) exit(1);
+}
 
 #define forall( it, c ) for( typeof((c).end()) it = (c).begin(); it != (c).end(); ++it )
-
-typedef int pipe_t[2];
 
 
 enum { UP, RIGHT, DOWN, LEFT };
 enum { MOVE, SHOOT, LASER, COM_ERROR };
 
 
-struct game;
+// forward declaration of class game
+class game;
 
 
-struct tank {
+class tank {
 
+public:
+
+	bool alive;
 	int x,y;
 	int player, tn;
-	bool alive;
 
 	tank () {}
 
-	tank ( int x, int y, int player, int tank ): x(x), y(y), player(player), tn(tank), alive(true) {}
+	tank ( int x, int y, int player, int tank ): alive(true), x(x), y(y), player(player), tn(tank) {}
 
 	pair<int,int> get_command( game* g );
 
@@ -53,7 +78,9 @@ struct tank {
 };
 
 
-struct play {
+class play {
+
+public:
 
 	int player, tn, direction;
 
@@ -65,32 +92,34 @@ struct play {
 };
 
 
-struct tank_proc {
+class tank_proc {
 
 	int pid;
 	int read_fd, write_fd;
+
+public:
 
 	tank_proc () {}
 
 	tank_proc ( char* child_proc ) {
 
-		pipe_t father_pipe, child_pipe;
+		int father_pipe[2], child_pipe[2];
 
 		// create pipes
 
 		if( pipe( father_pipe ) < 0 || pipe( child_pipe ) < 0 ) {
 
-			PRINT_ERROR( true, "Error while setting up the pipes" );
+			print_error( true, "Error while setting up the pipes" );
 		}
 
 		read_fd = father_pipe[0];
 		write_fd = child_pipe[1];
 
-		// create subprocess
+		// fork subprocess
 
 		if( ( pid = fork() ) < 0 ) {
 
-			PRINT_ERROR( true, "Error while setting up the child processes" );
+			print_error( true, "Error while setting up the child processes" );
 		}
 		if ( pid == 0 ) {
 
@@ -102,7 +131,7 @@ struct tank_proc {
 
 			execl( child_proc, NULL, NULL );
 
-			PRINT_ERROR( true, "Error while calling a child process" );
+			print_error( true, "Error while calling a child process" );
 		}
 
 		close( child_pipe[0] );
@@ -111,6 +140,8 @@ struct tank_proc {
 
 
 	int readln( int max, char* str ) {
+
+		if ( pid == -1 ) return 0;
 
 		int len = 0;
 
@@ -130,6 +161,8 @@ struct tank_proc {
 
 	int writeln( char* str ) {
 
+		if ( pid == -1 ) return 0;
+
 		return write( write_fd, str, strlen( str ) );
 	}
 
@@ -148,7 +181,9 @@ struct tank_proc {
 };
 
 
-struct mini_tank {
+class mini_tank {
+
+public:
 
 	int player, tn;
 
@@ -193,6 +228,10 @@ public:
 		remaining_players = players;
 		time = 0;
 
+		if( board_size * board_size < remaining_tanks ) {
+			print_error( true, "There are more tanks than places in the board" );
+		} 
+		
 		left_tanks = vector<int>( players, tanks_per_player );
 
 		init_procs();
@@ -203,18 +242,20 @@ public:
 
 	vector<int> play_game() {
 
-		if ( !played ) {
-			played = true;
-		} else {
-			return vector<int>();
-		}
+		if ( !played ) played = true;
+		else return vector<int>();
 
+		vector<int> back_left_tanks = left_tanks;
+
+		// game loop
 		while ( time++ < max_time && remaining_players > 1 ) {
 
-			if( time % 1000 )
-				INFORM( 1, "time: %d\n", time );
+			if( time % 1000 == 0 )
+				inform( 1, "time: %d\n", time );
 			else
-				INFORM( 2, "time: %d\n", time );
+				inform( 2, "time: %d\n", time );
+
+			back_left_tanks = left_tanks;
 
 			vector<vector<play> > commands = get_commands();
 
@@ -223,19 +264,26 @@ public:
 			laser_phase( commands[ LASER ] );
 		}
 
+		int max_tanks = 1;
+
 		if( time >= max_time ) {
 
-			INFORM( 0, "TIME LIMIT EXCEDEED\n" );
+			inform( 0, "TIME LIMIT EXCEDEED\n" );
+
+			max_tanks = *max_element( left_tanks.begin(), left_tanks.end() );
+		}
+		else if( remaining_players == 0 ) {
+
+			left_tanks = back_left_tanks;
 		}
 
 		// calculate winners
-		int M = *max_element( left_tanks.begin(), left_tanks.end() );
 
 		vector<int> ret;
 
 		for( int player = 0; player < players; player++ ) {
 
-			if( left_tanks[ player ] == M ) {
+			if( left_tanks[ player ] >= max_tanks ) {
 				ret.push_back( player );
 			}
 
@@ -251,6 +299,71 @@ public:
 private:
 
 
+	void init_procs() {
+
+		tank_procs = vector<vector<tank_proc> >( players, vector<tank_proc>( tanks_per_player ) );
+
+		char str[ MAX_COM_LEN ];
+
+		for( int player = 0; player < players; player++ )
+			forall( proc, tank_procs[ player ] ) {
+
+				*proc = tank_proc( executables[ player ] );
+
+				sprintf( str, "%d %d\n", player, shooting_range );
+
+				proc->writeln( str );
+			}
+	}
+
+
+	void init_tanks() {
+
+		vector<pair<int, int> > initial_pos;
+
+		if( board_size < ( remaining_tanks * 10 ) / board_size ) {
+			
+			for( int x = 0; x < board_size; x++ )
+				for( int y = 0; y < board_size; y++ )
+					initial_pos.push_back( make_pair( x, y ) );
+		} else {
+
+			set<pair<int,int> > pos;
+
+			while( (int)pos.size() < remaining_tanks )
+				pos.insert( make_pair( rand() % board_size, rand() % board_size ) );
+
+			initial_pos = vector<pair<int,int> >( pos.begin(), pos.end() );
+		}
+
+		random_shuffle( initial_pos.begin(), initial_pos.end() );
+		int pos = 0;
+
+		tanks = vector<vector<tank> >( players, vector<tank>( tanks_per_player ) );
+
+		for( int player = 0; player < players; player++ ) {
+			for( int tn = 0; tn < tanks_per_player; tn++ ) {
+
+				int x = initial_pos[pos].first;
+				int y = initial_pos[pos].second;
+				pos++;
+
+				tanks[ player ][ tn ] = tank( x, y, player, tn );
+
+				row_tank_list[y][x] = mini_tank( player, tn );
+				col_tank_list[x][y] = mini_tank( player, tn );
+			}
+		}
+	}
+
+
+	void kill_tank( int player, int tn ) {
+
+		tanks[ player ][ tn ].kill( this );
+		tank_procs[ player ][ tn ].kill_proc();
+	}
+
+
 	vector<vector<play> > get_commands() {
 
 		vector<vector<play> > ret(3, vector<play>(0) );
@@ -260,13 +373,13 @@ private:
 
 				if( !tn->alive ) continue;
 
-				INFORM( 4, "pos: %d %d\n", tn->x, tn->y );
+				inform( 4, "pos: %d %d\n", tn->x, tn->y );
 
 				pair<int,int> command = tn->get_command( this );
 
 				if ( command.first == COM_ERROR ) {
 
-					PRINT_ERROR( false, "Player's %d tank number %d produced"
+					print_error( false, "Player's %d tank number %d produced"
 										" a wrong command\nKilling tank...",
 										player, tn->tn );
 					// kill mother fucker
@@ -336,6 +449,8 @@ private:
 
 		forall( shoot, shoots ) {
 
+			if( !shoot->get_tank( this )->alive ) continue;
+
 			pair<tank*, int> nearest = shoot->get_tank( this )->find_nearest( this, shoot->direction );
 
 			if( nearest.second <= shooting_range ) {
@@ -354,59 +469,16 @@ private:
 
 		forall( laser, lasers ) {
 
+			if( !laser->get_tank( this )->alive ) continue;
+
 			pair<tank*, int> nearest = laser->get_tank( this )->find_nearest( this, laser->direction );
 
 			sprintf( str, "%d %d\n", nearest.first->player, nearest.second );
 
 			tank_procs[ laser->player ][ laser->tn ].writeln( str );
 
-			INFORM( 3, "ans: %s", str );
+			inform( 3, "ans: %s", str );
 		}
-	}
-
-
-	void init_procs() {
-
-		tank_procs = vector<vector<tank_proc> >( players, vector<tank_proc>( tanks_per_player ) );
-
-		char str[ MAX_COM_LEN ];
-
-		for( int player = 0; player < players; player++ )
-			forall( proc, tank_procs[ player ] ) {
-
-				*proc = tank_proc( executables[ player ] );
-
-				sprintf( str, "%d %d\n", player, shooting_range );
-
-				proc->writeln( str );
-			}
-	}
-
-
-	void init_tanks() {
-
-		tanks = vector<vector<tank> >( players, vector<tank>( tanks_per_player ) );
-
-
-		for( int player = 0; player < players; player++ ) {
-			for( int tn = 0; tn < tanks_per_player; tn++ ) {
-
-				int x = rand() % board_size;
-				int y = rand() % board_size;
-
-				tanks[ player ][ tn ] = tank( x, y, player, tn );
-
-				row_tank_list[y][x] = mini_tank( player, tn );
-				col_tank_list[x][y] = mini_tank( player, tn );
-			}
-		}
-	}
-
-
-	void kill_tank( int player, int tn ) {
-
-		tanks[ player ][ tn ].kill( this );
-		tank_procs[ player ][ tn ].kill_proc();
 	}
 };
 
@@ -436,7 +508,7 @@ pair<int,int> tank::get_command( game* g ) {
 		return make_pair( (int)COM_ERROR, 0 );
 	}
 
-	INFORM( 2, "%s\n", str );
+	inform( 2, "%s\n", str );
 
 	if( !strcmp( direction, "UP" ) ) dir = UP;
 	else if( !strcmp( direction, "RIGHT" ) ) dir = RIGHT;
@@ -491,22 +563,22 @@ pair<tank*, int> tank::find_nearest( game* g, int dir ) {
 	if( dir == UP || dir == LEFT ) {
 
 		if( tank_strip->begin()->first != coords.second ) {
-			tn = tank_strip->lower_bound( coords.second - 1 )->second;
+			tn = (--tank_strip->find( coords.second ))->second;
 		} else {
 			tn = tank_strip->rbegin()->second;
 			dis = g->board_size;
 		}
-		dis += coords.second - ( dir == LEFT ) ? tn.get_tank(g)->x : tn.get_tank(g)->y;
+		dis += coords.second - ( ( dir == LEFT ) ? tn.get_tank(g)->x : tn.get_tank(g)->y );
 
 	} else {
 
 		if( tank_strip->rbegin()->first != coords.second ) {
-			tn = tank_strip->upper_bound( coords.second )->second;
+			tn = (++tank_strip->find( coords.second ))->second;
 		} else {
 			tn = tank_strip->begin()->second;
 			dis = g->board_size;
 		}
-		dis += - coords.second + ( dir == RIGHT ) ? tn.get_tank(g)->x : tn.get_tank(g)->y;
+		dis += - coords.second + ( ( dir == RIGHT ) ? tn.get_tank(g)->x : tn.get_tank(g)->y );
 	}
 
 	return make_pair( tn.get_tank(g), dis );
@@ -517,8 +589,10 @@ int main( int argc, char** argv ) {
 
 	int tanks_per_player, board_size, shooting_range, max_time;
 
+	srand( time( NULL ) );
+
 	if ( argc < 6 ) {
-		PRINT_ERROR( true, "usage: ToT tanks_per_player board_size shooting_range "
+		print_error( true, "usage: ToT tanks_per_player board_size shooting_range "
 						   "max_time [player1program] [player2program] ..." );
 	}
 
@@ -531,9 +605,13 @@ int main( int argc, char** argv ) {
 
 	vector<int> winners = g.play_game();
 
-	forall( winner, winners ) {
-		INFORM( 0, "WINNER %d\n", *winner );
+	if( winners.size() > 1 ) {
+		inform( 0, "TIE BETWEEN:\n" );
+	} else {
+		inform( 0, "WINNER: " );
 	}
 
-	INFORM( 0, "END\n" );
+	forall( winner, winners ) {
+		inform( 0, "player %d\n", *winner );
+	}
 }

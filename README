@@ -30,4 +30,4 @@ Further clarifications:
 
  * After every tank has told its command, there's a moving phase, then a shooting phase, and finally a laser phase.
 
- * If a tank moves to an occupied position, both tanks are destroyed at the end of the moving phase ( so tank castling is valid)
+ * If a tank moves to an occupied position, both tanks are destroyed at the end of the moving phase (so tank castling is valid)
