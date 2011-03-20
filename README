@@ -6,22 +6,41 @@ The tanks can move, ask for information of the map or shoot a missile. When a ta
 
 The initial information you will get, is the following line:
 
-TEAM_ID SHOOT_RANGE
+MAP_SIZE TEAM_ID SHOOT_RANGE NUMBER_OF_TANKS
 
-  where TEAM_ID is a positive integer representing your team, and SHOOT_RANGE is the maximum distance the missiles reach
+  where MAP_SIZE is the length of the map, TEAM_ID is a positive integer representing your team, SHOOT_RANGE is the maximum distance the missiles reach, and NUMBER_OF_TANKS is the amount of tanks that your team controls.
 
-After this, and for the rest of the game, the operations (in order of appliance) available are:
+When the rest of the players have joined the server you will receive a list of coordinates X, Y with the initial coordinates of your tanks. 
+
+After this line, the server will query you for the command to execute for each tank, with this sintaxis:
+
+QUERY N
+
+  where N is the number of the tank.
+
+The operations (in order of priority of execution) available for the client when queried for a command are:
 
 MOVE [UP|RIGHT|DOWN|LEFT]
 
-  moves the tank one unit
+  moves the tank one unit. The server will answer OK or DEAD if your tank got killed becaus of stepping into another tank.
 
 SHOOT [UP|RIGHT|DOWN|LEFT]
 
-  shoots a missile
+  shoots a missile. The server will answer OK, always, and you will not get information on whether your shooting killed another tank.
 
 LASER [UP|RIGHT|DOWN|LEFT]
 
   it returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
 
-Every line should have an end of line
+Every command has to end with a POSIX end of line ('\n').
+
+The end of the round is marked by a message from the server saying:
+
+END OF ROUND.
+
+The end of the game is signaled by the server with the line:
+
+END OF GAME. [DRAW|WINNER: N]
+
+Where N is the winning team, in case there was one.
+
