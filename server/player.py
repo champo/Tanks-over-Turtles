@@ -1,6 +1,6 @@
 
 class Player:
-    def __init__(self, socket, number, game):
+    def __init__(self, socket, number, pos, game):
         self._file = # Magia de champo para que socket sea un file
         self._number = number
         self._game = game
@@ -15,8 +15,8 @@ class Player:
             self._number_of_tanks
         ))
 
-    def query_next_mmessage(self):
-        self._file.write("QUERY %d"%self._number)
+    def query_next_mmessage(self, tank):
+        self._file.write("QUERY %d\n"%tank)
 
     def send_result(self, message):
         self._file.write(message)

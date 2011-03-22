@@ -1,8 +1,35 @@
 from map import Map
 
+class Game:
+    def __init__(self, map, number_of_teams, tanks_per_team):
+        self._map = map
+        self._number_of_teams = number_of_teams
+        self._tanks_per_team = tanks_per_team
+        self._players = []
+
+        self._initial_positions = []
+        self._initialize()
+
+    def _initialize(self):
+        sock = socket()
+        sock.bind(('localhost', socket_port))
+        sock.listen(5)
+        number_of_clients = 0
+
+        while number_of_clients < number_of_teams:
+            new_socket = sock.accept()[0]
+            pos = self._generate_random_positions(self.self._tanks_per_team)
+            players.append(Player(
+                new_socket,
+                number_of_clients,
+                pos,
+                self
+            ))
+            number_of_clients += 1
+
 command_data = {}
 
-def play(map):
+def round(self):
     """ Game busy-loop """
     while not is_over(map.get_alive_tanks()):
         commands = []
