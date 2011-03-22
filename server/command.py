@@ -1,0 +1,4 @@
+
+class Command:
+    pass
+
