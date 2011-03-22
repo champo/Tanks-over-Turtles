@@ -1,4 +1,4 @@
-13/3/2011 version 1.0
+21/3/2011 version 2.0
 
 Tanks over Turtles is a game in which you have a given number of tanks over a circular world held by giant turtles.
 Each of your tanks runs the same strategy without knowledge of the other tanks.
@@ -14,23 +14,23 @@ When the rest of the players have joined the server you will receive a list of c
 
 After this line, the server will query you for the command to execute for each tank, with this sintaxis:
 
-QUERY N
+QUERY N, M, ...
 
-  where N is the number of the tank.
+  where N, M, ... are the numbers of the tanks asked to make an action.
 
 The operations (in order of priority of execution) available for the client when queried for a command are:
 
-MOVE [UP|RIGHT|DOWN|LEFT]
+N MOVE [UP|RIGHT|DOWN|LEFT]
 
-  moves the tank one unit. The server will answer OK or DEAD if your tank got killed becaus of stepping into another tank.
+  tank N moves one unit. The server will answer OK or DEAD if your tank got killed becaus of stepping into another tank.
 
-SHOOT [UP|RIGHT|DOWN|LEFT]
+N SHOOT [UP|RIGHT|DOWN|LEFT]
 
-  shoots a missile. The server will answer OK, always, and you will not get information on whether your shooting killed another tank.
+  tank N shoots a missile. The server will answer OK, always, and you will not get information on whether your shooting killed another tank.
 
-LASER [UP|RIGHT|DOWN|LEFT]
+N LASER [UP|RIGHT|DOWN|LEFT]
 
-  it returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
+  tank N shoots a laser to know what is that exists to a side of the tank. It returns two integers separated by a space, the TEAM_ID of the tank in the specified direction, and the distance to it (remember the map is circular, so there always is a tank in front of you).
 
 Every command has to end with a POSIX end of line ('\n').
 

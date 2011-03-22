@@ -1,9 +1,10 @@
 
 class Player:
-    def __init__(self, socket, number, pos, game):
-        self._file = # Magia de champo para que socket sea un file
+    def __init__(self, socket, number, pos, game_map):
+        self._file = socket.makefile()
         self._number = number
-        self._game = game
+        self._map = game_map
+        self._tanks = dict([(i, pos[i]) for i in xrange(len(pos))])
 
         self.send_initial_message()
 
