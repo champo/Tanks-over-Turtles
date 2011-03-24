@@ -2,6 +2,8 @@ from random import randrange
 
 import signal
 import time
+import threading
+from socket import socket
 from random import randrange
 
 from game_map import Map
@@ -35,6 +37,7 @@ class Game:
         self._tanks_per_team = tanks_per_team
         self._players = []
         self._active = {}
+        self._socket_port = 1667
 
         self._initial_positions = []
         self._initialize()
@@ -57,11 +60,11 @@ class Game:
 
     def _initialize(self):
         sock = socket()
-        sock.bind(('localhost', socket_port))
+        sock.bind(('localhost', self._socket_port))
         sock.listen(5)
         number_of_clients = 0
 
-        while number_of_clients < number_of_teams:
+        while number_of_clients < self._number_of_teams:
             new_socket = sock.accept()[0]
             pos = self._generate_random_positions(self._tanks_per_team)
             player = Player(

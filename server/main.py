@@ -1,14 +1,14 @@
-from sys import argv
+from sys import argv, exit
 from random import randrange
 import socket
 
-from game import play, action_with_response
+from game import Game
 from game_map import Map
-from tank import Tank
 
 def usage():
     print ("Usage: "
         "tot [map_size] [tanks_per_team] [shoot_range] [number_of_teams]")
+    exit(-1)
 
 def main():
     try:
