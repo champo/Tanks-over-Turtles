@@ -155,8 +155,8 @@ class Map(object):
         return [tank for tank in self._tank_to_pos.keys() if tank]
 
     def shoot_round_ended(self):
-        ''' This method should be called when the round is over, to
-        clean up all tanks that were killed in this round '''
+        ''' This method should be called when the shots have been called (haha)
+        to clean up all tanks that were killed in this round '''
         for tank in self._to_be_killed:
             self._take_tank_out(tank, self._tank_to_pos[tank])
             self._tank_to_pos.pop(tank)

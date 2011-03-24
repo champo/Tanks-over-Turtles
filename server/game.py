@@ -7,6 +7,27 @@ from random import randrange
 from game_map import Map
 from command import Command
 
+
+class CallerThread(threading.Thread):
+    def __init__(self, game, player, commands, list_lock):
+        threading.Thread.__init__(self)
+        self._game = game
+        self._player = player
+        self._commands = commands
+        self._list_lock = list_lock
+
+    def run(self):
+        self._player.query_tanks()
+        for command in self._player.get_commands():
+            new_command = Command(
+                self._game,
+                self._player,
+                command
+            )
+            self._list_lock.aquire()
+            self._commands.append(new_command)
+            self._list_lock.release()
+
 class Game:
     def __init__(self, game_map, number_of_teams, tanks_per_team):
         self._map = game_map
@@ -58,22 +79,32 @@ class Game:
             player.kill()        
 
     def round(self):
+
+        commands = []
+
+        # Trigger an alarm in two seconds if responses were not received
         def timedout():
             raise Exception("Timed out")
-
         oldsignal = signal.signal(signal.SIGALRM, timedout)
-
-        for player in self._active_players():
-            player.query_tanks()
-
         signal.alarm(2)
+        list_lock = threading.Lock()
         try:
-        commands = [
-            Command(self, player, command)
-            for command in player.get_commands()
-            for player in self._active_players()
-        ]
+            threads = []
+            for player in self._active_players():
+                thread = CallerThread(self, player, commands)
+                thread.start()
+                threads.append(thread)
+            for thread in threads:
+                thread.join()
+
         except:
+            # You were too slow.
+            # Let's be sure that we didn't interrupted somebody
+            list_lock.aquire()
+            for thread in threads:
+                thread._Thread__stop()
+                thread._Thread__delete()
+
             timed_out_players = [
                 player for player in self._active_players()
                 if not player in [
@@ -81,6 +112,7 @@ class Game:
                 ]
             ]
             self._kill_players(timed_out_players)
+
         finally:
             signal.alarm(0)
             signal.signal(signal.SIGALRM, oldsignal)
