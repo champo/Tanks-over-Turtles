@@ -14,7 +14,7 @@ class Player:
             self._map.get_size(),
             self._number,
             self._map.get_shoot_range(),
-            self._number_of_tanks
+            len(self._tanks_pos)
         ))
 
     def query_tanks(self):
@@ -36,3 +36,7 @@ class Player:
     def send_end_of_game(self):
         self._file.write("END OF GAME.\n")
 
+    def kill(self):
+        for tank in self._tanks:
+            tank.kill()
+        self._file.write("END OF GAME.\n")

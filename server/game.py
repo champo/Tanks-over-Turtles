@@ -8,6 +8,7 @@ from random import randrange
 
 from game_map import Map
 from command import Command
+from player import Player
 
 
 class CallerThread(threading.Thread):
@@ -26,18 +27,18 @@ class CallerThread(threading.Thread):
                 self._player,
                 command
             )
-            self._list_lock.aquire()
+            self._list_lock.acquire()
             self._commands.append(new_command)
             self._list_lock.release()
 
 class Game:
-    def __init__(self, game_map, number_of_teams, tanks_per_team):
+    def __init__(self, socket, game_map, number_of_teams, tanks_per_team):
         self._map = game_map
         self._number_of_teams = number_of_teams
         self._tanks_per_team = tanks_per_team
         self._players = []
         self._active = {}
-        self._socket_port = 1667
+        self._socket_port = socket
 
         self._initial_positions = []
         self._initialize()
@@ -45,10 +46,10 @@ class Game:
     def _generate_random_positions(self, number):
         retval = []
 
-        while len(retval) < number_of_positions:
+        while len(retval) < number:
             new_pair = (
-                randrange(self._map.get_length()),
-                randrange(self._map.get_length())
+                randrange(self._map.get_size()),
+                randrange(self._map.get_size())
             )
             if new_pair not in retval:
                 retval.append(new_pair)
@@ -69,7 +70,7 @@ class Game:
             pos = self._generate_random_positions(self._tanks_per_team)
             player = Player(
                 new_socket,
-                number_of_clients,
+                number_of_clients+1,
                 pos,
                 self._map
             )
@@ -103,7 +104,7 @@ class Game:
         except:
             # You were too slow.
             # Let's be sure that we didn't interrupted somebody
-            list_lock.aquire()
+            list_lock.acquire()
             for thread in threads:
                 thread._Thread__stop()
                 thread._Thread__delete()
